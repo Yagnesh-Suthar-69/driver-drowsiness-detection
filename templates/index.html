@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07100e">
+  <title>DriveAware — Driver Monitoring</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="DriveAware home">
+        <span class="brand-mark" aria-hidden="true">D</span>
+        <span>drive<span class="brand-light">aware</span></span>
+      </a>
+      <div class="topbar-right">
+        <span class="privacy-note"><span class="privacy-dot"></span> VIDEO STAYS ON THIS DEVICE</span>
+        <span class="system-clock" id="clock">--:--:--</span>
+      </div>
+    </header>
+
+    <main>
+      <section class="page-heading">
+        <div>
+          <p class="eyebrow">DRIVER MONITORING SYSTEM <span class="eyebrow-divider">/</span> PROTOTYPE</p>
+          <h1>Stay alert. <span>Arrive safe.</span></h1>
+          <p class="subtitle">Real-time fatigue cues, processed privately in your browser.</p>
+        </div>
+        <div class="session-state" id="session-state">
+          <span class="state-indicator"></span><span id="session-label">SYSTEM STANDBY</span>
+        </div>
+      </section>
+
+      <section class="alert-banner" id="alert-banner" role="alert" aria-live="assertive" hidden>
+        <span class="alert-symbol" aria-hidden="true">!</span>
+        <div><strong>DROWSINESS DETECTED!</strong><p>Please stay alert. Take a break if safe.</p></div>
+        <span class="alert-live">LIVE ALERT</span>
+      </section>
+
+      <div class="dashboard-grid">
+        <section class="panel camera-panel" aria-label="Camera preview">
+          <div class="panel-heading">
+            <div class="panel-title"><span class="live-dot" id="camera-dot"></span><h2>Live camera</h2></div>
+            <span class="camera-label" id="camera-status">CAMERA OFF</span>
+          </div>
+          <div class="camera-stage" id="camera-stage">
+            <video id="camera-video" autoplay playsinline muted></video>
+            <canvas id="landmark-canvas" aria-hidden="true"></canvas>
+            <div class="camera-placeholder" id="camera-placeholder">
+              <span class="camera-icon" aria-hidden="true">◎</span>
+              <strong>Camera is not active</strong>
+              <span>Start the camera to begin a live session</span>
+            </div>
+            <div class="camera-overlay">
+              <span class="camera-chip"><span class="live-dot"></span><span id="camera-chip-label">NO SIGNAL</span></span>
+              <span class="camera-resolution" id="camera-resolution">-- × --</span>
+            </div>
+            <div class="face-message" id="face-message" hidden>Position your face in the frame</div>
+          </div>
+          <div class="camera-footer">
+            <span><span class="footer-led" id="face-led"></span><span id="face-status">Face not detected</span></span>
+            <span class="mono" id="ear-readout">EAR —</span>
+          </div>
+          <div class="control-row">
+            <button class="button button-primary" id="monitor-button" type="button">Start monitoring</button>
+            <button class="button button-secondary" id="camera-button" type="button">Start camera</button>
+            <button class="button button-quiet" id="test-alarm-button" type="button" disabled>Test alarm</button>
+          </div>
+          <p class="camera-error" id="camera-error" role="status" hidden></p>
+          <p class="model-note">Face Landmarker loads from Google on first use; an internet connection is required. Camera frames are never uploaded.</p>
+        </section>
+
+        <section class="panel status-panel" aria-label="Driver status">
+          <div class="panel-heading"><div class="panel-title"><h2>Driver status</h2></div><span class="updated-label">LIVE</span></div>
+          <div class="driver-status normal" id="driver-status">
+            <span class="status-pulse"></span><span id="driver-status-label">NORMAL</span>
+          </div>
+          <div class="risk-block">
+            <div class="metric-heading"><span>Fatigue risk</span><strong id="risk-value">0%</strong></div>
+            <div class="risk-track"><span id="risk-bar"></span></div>
+            <div class="risk-scale"><span>LOW</span><span>ELEVATED</span><span>HIGH</span></div>
+          </div>
+          <div class="metric-list">
+            <div class="metric-row"><span>Eye state</span><strong id="eye-state">—</strong></div>
+            <div class="metric-row"><span>Eyes closed</span><strong class="mono" id="closure-duration">0.0 s</strong></div>
+            <div class="metric-row"><span>Yawns detected</span><strong class="mono" id="yawn-count">0</strong></div>
+            <div class="metric-row"><span>Head movement</span><strong id="head-status">—</strong></div>
+            <div class="metric-row"><span>PERCLOS <span class="metric-hint">(rolling window)</span></span><strong class="mono" id="perclos-value">0%</strong></div>
+          </div>
+          <div class="sound-controls">
+            <label class="toggle-control"><input type="checkbox" id="sound-toggle" checked><span class="toggle-track"></span><span>Alarm sound</span></label>
+            <label class="toggle-control"><input type="checkbox" id="voice-toggle"><span class="toggle-track"></span><span>Voice alert</span></label>
+            <span class="alarm-indicator" id="alarm-status"><span></span>ALARM OFF</span>
+          </div>
+        </section>
+      </div>
+
+      <section class="panel history-panel">
+        <div class="panel-heading history-heading">
+          <div><p class="eyebrow">SESSION LOG</p><h2>Detection history</h2></div>
+          <div class="history-actions"><span class="event-total" id="event-total">0 EVENTS</span><button class="text-button" id="reset-button" type="button">Reset statistics</button></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>EVENT</th><th>TIME</th><th>EYE CLOSURE</th><th>FATIGUE RISK</th><th>ALERT</th></tr></thead>
+            <tbody id="history-body"><tr class="empty-row"><td colspan="5">No detection events in this session.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <details class="panel settings-panel">
+        <summary><span><span class="eyebrow">CALIBRATION</span><strong>Detection settings</strong></span><span class="settings-expand">＋</span></summary>
+        <form id="settings-form" class="settings-grid">
+          <label>Eye aspect ratio threshold <span>Lower values require more closure</span><input name="ear_threshold" type="number" min="0.1" max="0.4" step="0.01"></label>
+          <label>Eye-closure alarm duration <span>Seconds of continuous closure</span><input name="eye_closure_seconds" type="number" min="0.5" max="5" step="0.1"></label>
+          <label>PERCLOS observation window <span>Rolling window in seconds</span><input name="perclos_window_seconds" type="number" min="15" max="300" step="1"></label>
+          <label>Fatigue risk threshold <span>Risk percentage for warning</span><input name="risk_threshold" type="number" min="10" max="100" step="1"></label>
+          <label>Yawning mouth ratio <span>Minimum mouth-opening ratio</span><input name="yawning_detection_threshold" type="number" min="0.2" max="1.5" step="0.05"></label>
+          <label>Repeated yawns for warning <span>Count in a rolling 5-minute window</span><input name="yawning_count_threshold" type="number" min="2" max="10" step="1"></label>
+          <label>Alarm repeat cooldown <span>Seconds between alarm tones</span><input name="alarm_cooldown_seconds" type="number" min="1" max="30" step="1"></label>
+          <label>Head-tilt threshold <span>Degrees from level</span><input name="head_tilt_degrees" type="number" min="10" max="40" step="1"></label>
+          <div class="settings-submit"><button class="button button-secondary" type="submit">Save settings</button><span id="settings-message" role="status"></span></div>
+        </form>
+      </details>
+
+      <footer><span>DRIVEAWARE <span class="footer-divider">·</span> EDUCATIONAL PROTOTYPE</span><span>Not a certified automotive safety device. Never rely on this system as the sole protection against driver fatigue.</span></footer>
+    </main>
+  </div>
+  <script type="module" src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
