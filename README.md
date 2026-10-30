@@ -1,6 +1,6 @@
 # DriveAware — Driver Drowsiness Detection
 
-A Flask dashboard for a real-time driver-monitoring prototype. The browser accesses the camera and runs MediaPipe Face Landmarker locally; Flask receives detection-event metadata only and stores it in SQLite. Camera images and video frames are not sent to the server.
+A Flask dashboard for a real-time driver-monitoring prototype. The browser accesses the camera and runs MediaPipe Face Landmarker locally; Flask receives detection-event metadata only and keeps dashboard settings and event history in memory. Camera images and video frames are not sent to the server. No database or database file is used.
 
 > **Safety notice:** This is an educational prototype, not a certified automotive safety device. Thresholds and fatigue cues have not been validated for real driving. Lighting, glasses, camera position, and individual differences can cause missed detections or false alarms. Never rely on this system as the sole protection against driver fatigue, and do not interact with the dashboard while driving.
 
@@ -48,7 +48,7 @@ Then open `http://127.0.0.1:5000` in a browser and allow camera access.
 - **Fatigue risk:** a heuristic percentage combining closure duration, PERCLOS, recent yawns, and sustained head movement. It is not a probability or medical measurement.
 - **Alerts:** the browser plays a Web Audio tone while a drowsy condition remains active, repeating at the configured cooldown; optional browser speech alerts are available. Use **Test alarm** to verify browser audio.
 - **Landmarks:** eye, mouth, and nose points are drawn over the local camera preview. The system pauses measurements if no face or multiple faces are present to avoid attributing measurements to an ambiguous person.
-- **Statistics:** detection event metadata and saved thresholds persist in `drowsiness.db` next to `app.py`. Use **Reset statistics** to clear event history.
+- **Statistics:** detection event metadata and thresholds are held in memory while the Flask process runs. The latest 100 events appear in the history. Settings and event history reset when the server restarts; use **Reset statistics** to clear event history before then.
 
 Open **Detection settings** in the dashboard to change the EAR threshold, eye-closure alarm duration, PERCLOS window, risk threshold, yawn ratio/count threshold, alarm cooldown, and head-tilt threshold. Values are validated by the Flask API before being saved.
 
@@ -56,7 +56,6 @@ Open **Detection settings** in the dashboard to change the EAR threshold, eye-cl
 
 ```text
 app.py
-database.py
 requirements.txt
 templates/
   index.html
