@@ -3,6 +3,8 @@ import { analyzeFrame, configureDetection, missingFace, resetDetection } from ".
 const video = document.getElementById("camera-video");
 const canvas = document.getElementById("landmark-canvas");
 const context = canvas.getContext("2d");
+const MEDIAPIPE_VERSION = "0.10.21";
+const MEDIAPIPE_CDN = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_VERSION}`;
 let stream = null;
 let landmarker = null;
 let frameRequest = null;
@@ -10,11 +12,9 @@ let monitoring = false;
 let lastAnalysisTime = 0;
 
 async function createLandmarker() {
-  const vision = await import(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22"
-  );
+  const vision = await import(`${MEDIAPIPE_CDN}/vision_bundle.mjs`);
   const fileset = await vision.FilesetResolver.forVisionTasks(
-    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm",
+    `${MEDIAPIPE_CDN}/wasm`,
   );
   const options = {
     baseOptions: {

@@ -11,7 +11,7 @@ A Flask dashboard for a real-time driver-monitoring prototype. The browser acces
 - Internet access when loading the MediaPipe Tasks Vision JavaScript library and Face Landmarker model
 - A webcam (built-in or USB)
 
-The model is downloaded by the browser from Google's public MediaPipe model hosting when the camera is started; it is not bundled in this repository. Camera permission is available on `localhost`. The app uses Google's CDN for the MediaPipe JavaScript/WASM runtime and model, so the first session requires internet access.
+The model is downloaded by the browser from Google's public MediaPipe model hosting when the camera is started; it is not bundled in this repository. Camera permission is available on `localhost`. The app loads the MediaPipe Tasks Vision `0.10.21` JavaScript/WASM runtime from jsDelivr and downloads the model from Google's CDN, so the first session requires internet access.
 
 ## Install and run on Windows
 
